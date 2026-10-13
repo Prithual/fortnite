@@ -11,6 +11,8 @@ import { NetworkClient } from './network/NetworkClient.js';
 import { UIManager } from './ui/UIManager.js';
 import { soundManager } from './audio/SoundSynthesizer.js';
 import { LootManager } from './world/LootManager.js';
+import { ChatManager } from './ui/ChatManager.js';
+import { VoiceChatManager } from './voice/VoiceChatManager.js';
 
 class FortniteGame {
   constructor() {
@@ -21,8 +23,8 @@ class FortniteGame {
     this.initThree();
     this.initWorld();
     this.initPlayer();
-    this.initSystems();
     this.initNetwork();
+    this.initSystems();
     this.initInputBinds();
     this.initLobbyUI();
 
@@ -73,6 +75,8 @@ class FortniteGame {
     this.storm = new StormSystem(this.scene);
     this.ui = new UIManager(this.camera);
     this.loot = new LootManager(this.scene);
+    this.chat = new ChatManager(this.net, this.renderer.domElement);
+    this.voice = new VoiceChatManager(this.net);
     this.isMouseDown = false;
     this.turboBuildTimer = 0;
   }
@@ -242,6 +246,13 @@ class FortniteGame {
       if (data.winnerId === this.player.id) {
         this.ui.showVictoryRoyale();
         soundManager.playVictoryRoyale();
+      }
+    });
+
+    this.net.on('voice_speaking', (data) => {
+      const rp = this.remotePlayers.get(data.speakerId);
+      if (rp) {
+        rp.setSpeaking(data.isSpeaking);
       }
     });
   }
@@ -463,6 +474,9 @@ class FortniteGame {
 
       // Connect to WebSocket server
       this.net.connect(room, name);
+
+      // Enable WebRTC Voice Chat
+      this.voice.enableVoice();
     });
   }
 

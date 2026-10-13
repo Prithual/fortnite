@@ -85,6 +85,7 @@ export class PlayerController {
   initKeyboard() {
     window.addEventListener('keydown', (e) => {
       if (!this.alive) return;
+      if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
       const key = e.code;
 
       if (key === 'KeyW') this.keys.forward = true;
@@ -103,6 +104,7 @@ export class PlayerController {
     });
 
     window.addEventListener('keyup', (e) => {
+      if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
       const key = e.code;
       if (key === 'KeyW') this.keys.forward = false;
       if (key === 'KeyS') this.keys.backward = false;

@@ -67,13 +67,14 @@ export class RemotePlayer {
 
     if (!this.alive) return;
 
-    // Draw Name
+    // Draw Name and Voice Speaker icon
     ctx.font = 'bold 24px sans-serif';
     ctx.textAlign = 'center';
     ctx.fillStyle = this.isBot ? '#ffd166' : '#ffffff';
     ctx.shadowColor = 'black';
     ctx.shadowBlur = 4;
-    ctx.fillText(this.name, 128, 24);
+    const displayName = (this.isSpeaking ? '🔊 ' : '') + this.name;
+    ctx.fillText(displayName, 128, 24);
 
     // Draw Health / Shield Mini-Bar
     ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
@@ -105,6 +106,13 @@ export class RemotePlayer {
 
     this.root.visible = this.alive && (this.state !== 'in_bus');
     this.updateNameTag();
+  }
+
+  setSpeaking(isSpeaking) {
+    if (this.isSpeaking !== isSpeaking) {
+      this.isSpeaking = isSpeaking;
+      this.updateNameTag();
+    }
   }
 
   update(dt) {

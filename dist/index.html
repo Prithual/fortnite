@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FORTNITE 3D BATTLE ROYALE</title>
-  <script type="module" crossorigin src="/assets/index-ClYqZGqM.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-Cs6VkaZq.css">
+  <script type="module" crossorigin src="/assets/index-CVsAry5p.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-CBzw3Js-.css">
 </head>
 <body>
   <!-- 3D Canvas Container -->
@@ -52,6 +52,9 @@
             <div class="stat-label" id="storm-phase-label">STORM PHASE 1</div>
           </div>
         </div>
+        <div class="stat-badge" id="voice-status">
+          🎙️ <span style="color:#94a3b8">MIC MUTED</span> <span style="font-size:12px;color:#ffd166;">[HOLD V OR PRESS M]</span>
+        </div>
       </div>
 
       <!-- Minimap -->
@@ -81,6 +84,13 @@
           <line x1="32" y1="32" x2="24" y2="24" stroke="#ff0055" stroke-width="3" stroke-linecap="round"/>
         </svg>
       </div>
+    </div>
+
+    <!-- In-Game Text Chat Container -->
+    <div id="chat-container">
+      <div id="chat-messages"></div>
+      <input type="text" id="chat-input" placeholder="Type message... (Enter to send, Esc to cancel)" maxlength="120" />
+      <div class="chat-hint">[ENTER] CHAT • [V] VOICE PTT • [M] MUTE</div>
     </div>
 
     <!-- Floating Damage Numbers -->

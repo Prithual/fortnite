@@ -781,6 +781,44 @@ wss.on('connection', (ws) => {
           }
           break;
         }
+
+        case 'chat_message': {
+          if (currentRoom) {
+            const p = currentRoom.players.get(playerId);
+            currentRoom.broadcast({
+              type: 'chat_message',
+              senderId: playerId,
+              senderName: p ? p.name : 'Soldier',
+              text: data.text
+            });
+          }
+          break;
+        }
+
+        case 'webrtc_signal': {
+          if (currentRoom && data.targetId) {
+            const targetWs = currentRoom.clients.get(data.targetId);
+            if (targetWs && targetWs.readyState === WebSocket.OPEN) {
+              targetWs.send(JSON.stringify({
+                type: 'webrtc_signal',
+                senderId: playerId,
+                signal: data.signal
+              }));
+            }
+          }
+          break;
+        }
+
+        case 'voice_speaking': {
+          if (currentRoom) {
+            currentRoom.broadcast({
+              type: 'voice_speaking',
+              speakerId: playerId,
+              isSpeaking: data.isSpeaking
+            });
+          }
+          break;
+        }
       }
     } catch (err) {
       console.error('WS Error:', err);
