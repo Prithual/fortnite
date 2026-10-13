@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FORTNITE 3D BATTLE ROYALE</title>
+  <link rel="stylesheet" href="./src/style.css">
+</head>
+<body>
+  <!-- 3D Canvas Container -->
+  <div id="canvas-container"></div>
+
+  <!-- Storm Warning Border Vignette -->
+  <div id="storm-vignette"></div>
+
+  <!-- Sniper Scope Overlay -->
+  <div id="sniper-scope">
+    <div class="scope-crosshair">
+      <div class="scope-line scope-h"></div>
+      <div class="scope-line scope-v"></div>
+      <div class="scope-circle"></div>
+    </div>
+  </div>
+
+  <!-- Loot Pickup Prompt -->
+  <div id="loot-prompt" class="loot-prompt"></div>
+
+  <!-- UI Overlay -->
+  <div id="hud-overlay">
+    <!-- Top Bar -->
+    <div class="hud-top">
+      <div class="match-stats">
+        <div class="stat-badge">
+          <span class="stat-icon">👥</span>
+          <div>
+            <div class="stat-val" id="alive-count">10</div>
+            <div class="stat-label">ALIVE</div>
+          </div>
+        </div>
+        <div class="stat-badge">
+          <span class="stat-icon">💀</span>
+          <div>
+            <div class="stat-val" id="kill-count">0</div>
+            <div class="stat-label">KILLS</div>
+          </div>
+        </div>
+        <div class="stat-badge">
+          <span class="stat-icon">⚡</span>
+          <div>
+            <div class="stat-val" id="storm-timer">0:45</div>
+            <div class="stat-label" id="storm-phase-label">STORM PHASE 1</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Minimap -->
+      <div class="minimap-container">
+        <canvas id="minimap-canvas" width="160" height="160"></canvas>
+      </div>
+    </div>
+
+    <!-- Battle Bus Drop Prompt -->
+    <div id="bus-drop-prompt" class="bus-drop-prompt">
+      🚀 PRESS [SPACE] TO JUMP FROM BATTLE BUS!
+    </div>
+
+    <!-- Center Reticle / Crosshair -->
+    <div class="crosshair-container">
+      <div class="crosshair">
+        <div class="crosshair-dot"></div>
+        <div class="ch-line ch-top"></div>
+        <div class="ch-line ch-bottom"></div>
+        <div class="ch-line ch-left"></div>
+        <div class="ch-line ch-right"></div>
+        <!-- Hitmarker -->
+        <svg class="hitmarker" id="hitmarker" viewBox="0 0 40 40">
+          <line x1="8" y1="8" x2="16" y2="16" stroke="#ff0055" stroke-width="3" stroke-linecap="round"/>
+          <line x1="32" y1="8" x2="24" y2="16" stroke="#ff0055" stroke-width="3" stroke-linecap="round"/>
+          <line x1="8" y1="32" x2="16" y2="24" stroke="#ff0055" stroke-width="3" stroke-linecap="round"/>
+          <line x1="32" y1="32" x2="24" y2="24" stroke="#ff0055" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Floating Damage Numbers -->
+    <div id="damage-numbers-layer"></div>
+
+    <!-- Kill Feed -->
+    <div class="kill-feed" id="kill-feed"></div>
+
+    <!-- Bottom HUD -->
+    <div class="hud-bottom">
+      <!-- Health & Shield Status -->
+      <div class="status-bars">
+        <div class="bar-wrapper">
+          <div class="bar-fill shield-fill" id="shield-bar"></div>
+          <div class="bar-text">🛡️ <span id="shield-val">100</span></div>
+        </div>
+        <div class="bar-wrapper">
+          <div class="bar-fill health-fill" id="health-bar"></div>
+          <div class="bar-text">➕ <span id="health-val">100</span></div>
+        </div>
+      </div>
+
+      <!-- Building Hotbar -->
+      <div class="build-hotbar">
+        <div class="build-slot active" id="slot-wall" title="Wall [Q]">
+          <span class="build-key">Q</span>
+          <span class="build-icon">🧱</span>
+        </div>
+        <div class="build-slot" id="slot-ramp" title="Ramp [E]">
+          <span class="build-key">E</span>
+          <span class="build-icon">📐</span>
+        </div>
+        <div class="build-slot" id="slot-floor" title="Floor [F]">
+          <span class="build-key">F</span>
+          <span class="build-icon">🟫</span>
+        </div>
+        <div class="build-slot" id="slot-roof" title="Roof [R]">
+          <span class="build-key">R</span>
+          <span class="build-icon">🔺</span>
+        </div>
+      </div>
+
+      <!-- Material Counters -->
+      <div class="material-counters">
+        <div class="mat-item">
+          <span>🌲</span>
+          <span id="mat-wood">150</span>
+        </div>
+        <div class="mat-item">
+          <span>🪨</span>
+          <span id="mat-stone">80</span>
+        </div>
+        <div class="mat-item">
+          <span>🔩</span>
+          <span id="mat-metal">40</span>
+        </div>
+      </div>
+
+      <!-- Weapon Hotbar -->
+      <div class="weapon-hotbar">
+        <div class="weapon-slot rarity-common active" id="slot-1">
+          <span class="slot-number">1</span>
+          <span class="weapon-icon">⛏️</span>
+          <span class="ammo-count">∞</span>
+        </div>
+        <div class="weapon-slot rarity-legendary" id="slot-2">
+          <span class="slot-number">2</span>
+          <span class="weapon-icon">🔫</span>
+          <span class="ammo-count" id="ammo-ar">30</span>
+        </div>
+        <div class="weapon-slot rarity-epic" id="slot-3">
+          <span class="slot-number">3</span>
+          <span class="weapon-icon">💥</span>
+          <span class="ammo-count" id="ammo-shotgun">5</span>
+        </div>
+        <div class="weapon-slot rarity-legendary" id="slot-4">
+          <span class="slot-number">4</span>
+          <span class="weapon-icon">🎯</span>
+          <span class="ammo-count" id="ammo-sniper">1</span>
+        </div>
+        <div class="weapon-slot rarity-uncommon" id="slot-5">
+          <span class="slot-number">5</span>
+          <span class="weapon-icon">🧪</span>
+          <span class="ammo-count" id="ammo-shield">3</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- #1 VICTORY ROYALE CELEBRATION -->
+  <div id="victory-banner">
+    <div class="victory-title">#1 VICTORY ROYALE</div>
+    <div class="victory-subtitle">CHAMPION OF THE ISLAND!</div>
+  </div>
+
+  <!-- Start & Lobby Screen -->
+  <div id="start-screen">
+    <div class="lobby-card">
+      <div class="game-logo">FORTNITE 3D</div>
+      <p style="font-size: 20px; color: #94a3b8; text-align: center;">
+        Drop from the Battle Bus • Farm Materials • Build Cover • Win Victory Royale!
+      </p>
+
+      <input type="text" id="player-name-input" class="lobby-input" placeholder="Your Soldier Name" value="Jonesy">
+
+      <div style="display: flex; gap: 8px; width: 100%;">
+        <input type="text" id="room-id-input" class="lobby-input" placeholder="Room ID" value="main">
+        <button id="share-room-btn" class="share-btn">Share Link</button>
+      </div>
+
+      <button id="start-game-btn" class="play-btn">READY UP (PLAY)</button>
+
+      <div style="font-size: 16px; color: #64748b; line-height: 1.4; text-align: center;">
+        WASD: Move • Space: Jump / Glider • Shift: Sprint • C: Crouch<br>
+        Right Click: ADS Aim • Left Click: Shoot / Mine / Build<br>
+        1-5: Weapons • Q: Wall • E: Ramp • F: Floor • R: Roof
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

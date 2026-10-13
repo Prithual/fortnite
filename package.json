@@ -1,0 +1,20 @@
+{
+  "name": "fortnite-3d-multiplayer",
+  "version": "1.0.0",
+  "description": "3D Real-Time Multiplayer Fortnite Battle Royale in the Browser",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "start": "node server.js",
+    "serve": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.3.0",
+    "three": "^0.186.1",
+    "ws": "^8.22.0"
+  },
+  "devDependencies": {
+    "vite": "^8.3.4"
+  }
+}

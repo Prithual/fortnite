@@ -1,0 +1,596 @@
+@import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Teko:wght@600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+body, html {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #0b0f19;
+  font-family: 'Teko', sans-serif;
+  color: #fff;
+}
+
+#canvas-container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+/* Sniper Scope Overlay */
+#sniper-scope {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, transparent 38%, rgba(0, 0, 0, 0.98) 45%);
+  pointer-events: none;
+  z-index: 15;
+  display: none;
+}
+
+.scope-crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+}
+
+.scope-line {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.85);
+}
+.scope-h { top: 50%; left: 0; width: 100%; height: 2px; }
+.scope-v { left: 50%; top: 0; width: 2px; height: 100%; }
+
+.scope-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 280px;
+  height: 280px;
+  border: 2px solid rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+}
+
+/* Loot Pickup Prompt */
+.loot-prompt {
+  position: absolute;
+  top: 62%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(18, 22, 34, 0.9);
+  border: 2px solid #ffd166;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 24px;
+  letter-spacing: 1px;
+  z-index: 20;
+  pointer-events: none;
+  display: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+}
+
+/* UI Overlay Container */
+#hud-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Top Bar: Match Stats & Minimap */
+.hud-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px 24px;
+}
+
+.match-stats {
+  display: flex;
+  gap: 16px;
+}
+
+.stat-badge {
+  background: rgba(18, 22, 34, 0.85);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 6px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.stat-icon {
+  font-size: 20px;
+}
+
+.stat-val {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+  color: #ffffff;
+}
+
+.stat-label {
+  font-size: 16px;
+  color: #a0aec0;
+  letter-spacing: 1px;
+}
+
+/* Minimap */
+.minimap-container {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  border: 4px solid #ffd166;
+  background: rgba(11, 26, 44, 0.9);
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+}
+
+#minimap-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* Center Crosshair */
+.crosshair-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition: transform 0.05s ease-out;
+}
+
+.crosshair {
+  position: relative;
+  width: 20px;
+  height: 20px;
+}
+
+.crosshair-dot {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 4px;
+  height: 4px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 4px rgba(0,0,0,0.8);
+}
+
+.ch-line {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 3px rgba(0,0,0,0.8);
+}
+.ch-top { top: -6px; left: 8px; width: 4px; height: 8px; }
+.ch-bottom { bottom: -6px; left: 8px; width: 4px; height: 8px; }
+.ch-left { left: -6px; top: 8px; width: 8px; height: 4px; }
+.ch-right { right: -6px; top: 8px; width: 8px; height: 4px; }
+
+/* Hitmarker ticks */
+.hitmarker {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  width: 40px;
+  height: 40px;
+  opacity: 0;
+  transition: opacity 0.1s ease-out;
+}
+.hitmarker.show {
+  opacity: 1;
+}
+
+/* Floating Damage Numbers */
+#damage-numbers-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.dmg-popup {
+  position: absolute;
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 26px;
+  text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;
+  animation: floatUp 0.8s ease-out forwards;
+}
+
+.dmg-shield { color: #00f0ff; }
+.dmg-health { color: #ffffff; }
+.dmg-crit { color: #ffd60a; font-size: 36px; }
+
+@keyframes floatUp {
+  0% { transform: translateY(0) scale(0.8); opacity: 1; }
+  40% { transform: translateY(-24px) scale(1.2); opacity: 1; }
+  100% { transform: translateY(-50px) scale(0.9); opacity: 0; }
+}
+
+/* Kill Feed */
+.kill-feed {
+  position: absolute;
+  bottom: 140px;
+  left: 24px;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.kill-entry {
+  background: rgba(18, 22, 34, 0.85);
+  border-left: 4px solid #ef476f;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 18px;
+  letter-spacing: 0.5px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(-15px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Bottom Bar: Health/Shield, Materials, Hotbars */
+.hud-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 20px 28px;
+}
+
+/* Health & Shield Bars */
+.status-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 300px;
+}
+
+.bar-wrapper {
+  background: rgba(15, 20, 30, 0.85);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  height: 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.bar-fill {
+  height: 100%;
+  transition: width 0.15s ease-out;
+}
+
+.shield-fill {
+  background: linear-gradient(90deg, #0077b6, #00b4d8);
+  width: 100%;
+}
+
+.health-fill {
+  background: linear-gradient(90deg, #1b9aaa, #2ec4b6);
+  width: 100%;
+}
+
+.bar-text {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-shadow: 1px 1px 2px #000;
+}
+
+/* Building Hotbar */
+.build-hotbar {
+  display: flex;
+  gap: 8px;
+  background: rgba(18, 22, 34, 0.85);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 6px;
+}
+
+.build-slot {
+  width: 52px;
+  height: 52px;
+  background: rgba(30, 36, 52, 0.9);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.1s ease;
+}
+
+.build-slot.active {
+  border-color: #00b4d8;
+  box-shadow: 0 0 12px #00b4d8;
+  transform: scale(1.08);
+}
+
+.build-key {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  font-size: 14px;
+  color: #ffd166;
+}
+
+.build-icon {
+  font-size: 22px;
+}
+
+/* Materials Counter */
+.material-counters {
+  display: flex;
+  gap: 12px;
+  background: rgba(18, 22, 34, 0.85);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 6px 12px;
+}
+
+.mat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+/* Weapon Hotbar */
+.weapon-hotbar {
+  display: flex;
+  gap: 10px;
+}
+
+.weapon-slot {
+  width: 68px;
+  height: 68px;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: rgba(20, 26, 40, 0.9);
+  transition: all 0.15s ease;
+}
+
+.weapon-slot.active {
+  border-color: #ffd166;
+  box-shadow: 0 0 16px rgba(255, 209, 102, 0.8);
+  transform: translateY(-8px) scale(1.06);
+}
+
+.slot-number {
+  position: absolute;
+  top: 3px;
+  left: 6px;
+  font-size: 16px;
+  color: #ffffff;
+}
+
+.weapon-icon {
+  font-size: 28px;
+}
+
+.ammo-count {
+  position: absolute;
+  bottom: 2px;
+  right: 6px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+/* Rarities */
+.rarity-common { background: linear-gradient(135deg, #4a5568, #2d3748); }
+.rarity-uncommon { background: linear-gradient(135deg, #2a9d8f, #1b4332); }
+.rarity-rare { background: linear-gradient(135deg, #0077b6, #03045e); }
+.rarity-epic { background: linear-gradient(135deg, #7209b7, #3a0ca3); }
+.rarity-legendary { background: linear-gradient(135deg, #f77f00, #d62828); }
+
+/* Battle Bus Drop Prompt */
+.bus-drop-prompt {
+  position: absolute;
+  top: 75%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(18, 22, 34, 0.9);
+  border: 3px solid #ffd166;
+  border-radius: 12px;
+  padding: 14px 28px;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+  animation: pulse 1.2s infinite alternate;
+}
+
+@keyframes pulse {
+  from { transform: translateX(-50%) scale(1); }
+  to { transform: translateX(-50%) scale(1.06); }
+}
+
+/* Storm Outside Vignette */
+#storm-vignette {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  box-shadow: inset 0 0 100px 40px rgba(155, 93, 229, 0.6);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 5;
+}
+#storm-vignette.active {
+  opacity: 1;
+}
+
+/* VICTORY ROYALE BANNER */
+#victory-banner {
+  position: absolute;
+  top: 35%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.6) rotate(-3deg);
+  background: linear-gradient(135deg, #ffd166, #ff9f1c);
+  padding: 24px 60px;
+  border: 6px solid #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(255, 209, 102, 0.8), 0 0 80px rgba(255, 159, 28, 0.6);
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 100;
+}
+
+#victory-banner.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1) rotate(-3deg);
+}
+
+.victory-title {
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 72px;
+  color: #ffffff;
+  text-shadow: 4px 4px 0 #d90429, -4px -4px 0 #d90429, 4px -4px 0 #d90429, -4px 4px 0 #d90429;
+  letter-spacing: 4px;
+}
+
+.victory-subtitle {
+  font-size: 28px;
+  color: #2b2d42;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+/* Start Screen & Match Lobby */
+#start-screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, rgba(30, 41, 59, 0.95), #0b0f19);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  pointer-events: auto;
+}
+
+.lobby-card {
+  background: rgba(18, 22, 34, 0.9);
+  border: 3px solid #3a86ff;
+  border-radius: 16px;
+  padding: 36px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+  max-width: 480px;
+  width: 90%;
+}
+
+.game-logo {
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 64px;
+  color: #ffd166;
+  text-shadow: 3px 3px 0 #d90429;
+  letter-spacing: 3px;
+  text-align: center;
+}
+
+.lobby-input {
+  width: 100%;
+  padding: 12px 18px;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background: #1e293b;
+  color: #ffffff;
+  font-size: 24px;
+  font-family: 'Teko', sans-serif;
+  outline: none;
+}
+.lobby-input:focus {
+  border-color: #3a86ff;
+}
+
+.play-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #ffd166, #ff9f1c);
+  color: #111;
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 32px;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(255, 159, 28, 0.5);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.play-btn:hover {
+  transform: scale(1.03);
+  box-shadow: 0 8px 24px rgba(255, 159, 28, 0.8);
+}
+.play-btn:active {
+  transform: scale(0.98);
+}
+
+.share-btn {
+  background: #3a86ff;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-family: 'Teko', sans-serif;
+  font-size: 20px;
+  cursor: pointer;
+}
+.share-btn:hover {
+  background: #2563eb;
+}
